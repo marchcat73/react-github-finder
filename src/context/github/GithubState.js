@@ -1,7 +1,7 @@
-import React, {useReduser} from 'react'
+import React, {useReducer} from 'react'
 import axios from 'axios'
 import GithubContext from './githubContext'
-import GithubReduser from './githubReduser'
+import GithubReducer from './githubReducer'
 import {
 	SEARCH_USERS,
 	SET_LOADING,
@@ -10,7 +10,7 @@ import {
 	GET_REPOS
 } from '../types'
 
-const GithubState = props => {
+const GithubState = (props) => {
 	
 	const initialState = {
 		users: [],
@@ -19,7 +19,8 @@ const GithubState = props => {
 		loading: false
 	}
 
-	const [state, dispatch] = useReduser(GithubReduser, initialState)
+	const [state, dispatch] = useReducer(GithubReducer, initialState)
+	
 
   // Search Github users
   const searchUsers = async (text) => {
@@ -44,6 +45,16 @@ const GithubState = props => {
 		}
 
 	// Get Repos
+	const getUserRepos = async (username) => {
+    setLoading()
+    const res = await axios.get(`https://api.github.com/users/${username}/repos?per_page=20&sort=created:asd&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`)
+    
+		dispatch({
+			type: GET_REPOS,
+			payload: res.data
+		})
+
+  } 
 
 	// Clear Users
   const clearUsers = () => dispatch({type: CLEAR_USERS})
@@ -58,7 +69,8 @@ const GithubState = props => {
 			loading: state.loading,
 			searchUsers,
 			clearUsers,
-			getUser
+			getUser,
+			getUserRepos
 		}}
 	>
 		{ props.children }
